@@ -54,21 +54,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 渲染循环：平滑跟踪 + 仅让 rotationGroup 绕 Y 轴自转
   renderer.setAnimationLoop(() => {
     if (model) {
-      // 获取 anchor 世界矩阵并分解到目标位置与四元数
+      // 1. 拿到 anchor.group 的世界矩阵
       const worldMat = anchor.group.matrixWorld;
       const targetPos = new THREE.Vector3();
       const targetQuat = new THREE.Quaternion();
       worldMat.decompose(targetPos, targetQuat, new THREE.Vector3());
 
-      // 平滑位置和旋转
+      // 2. 平滑应用到 orientationGroup
       smoothPos.lerp(targetPos, 0.5);
       smoothQuat.slerp(targetQuat, 0.5);
-      rotationGroup.position.copy(smoothPos);
-      rotationGroup.quaternion.copy(smoothQuat);
+      orientationGroup.position.copy(smoothPos);
+      orientationGroup.quaternion.copy(smoothQuat);
 
-      // 自转动画
+      // 3. rotationGroup 只做本地自转（位置始终为 0,0,0，四元数由 orientationGroup 决定）
       rotationGroup.rotation.y += 0.01;
     }
+
     renderer.render(scene, camera);
   });
 });
