@@ -2,10 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MindARThree } from 'mindar-image-three';
 
-let model = null;
-// 平滑变换缓存
-const smoothPos = new THREE.Vector3();
-const smoothQuat = new THREE.Quaternion();
+let model = null; // ✅ 全局变量，便于后续访问模型（如在渲染循环中平滑动画等）
 
 document.addEventListener("DOMContentLoaded", async () => {
   const mindarThree = new MindARThree({
@@ -14,34 +11,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const { renderer, scene, camera } = mindarThree;
+
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   // 添加环境光照
   const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
   scene.add(light);
 
-  // —— 创建校正与旋转容器 ——
   const anchor = mindarThree.addAnchor(0);
-  const orientationGroup = new THREE.Group();
-  const rotationGroup    = new THREE.Group();
-  anchor.group.add(orientationGroup);
-  orientationGroup.add(rotationGroup);
 
-  // 加载模型到 rotationGroup
   const loader = new GLTFLoader();
   loader.load(
     './assets/model.glb',
     (gltf) => {
-      model = gltf.scene; // 全局变量引用
-
-      // 如果在 Blender 中调整过朝向，需要做逆向校正
-      model.rotation.set(Math.PI/2, 0, 0);
+      model = gltf.scene; // ✅ 将模型赋值给全局变量
 
       model.position.set(0, 0.2, 0);
       model.scale.set(0.5, 0.5, 0.5);
 
-      rotationGroup.add(model); // 添加到旋转容器
-      console.log("✅ 模型已添加并校正朝向");
+      anchor.group.add(model);
+      console.log("✅ 模型已添加至 anchor.group");
     },
     undefined,
     (error) => {
@@ -51,27 +40,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await mindarThree.start();
 
-  // 渲染循环：平滑跟踪 + 仅让 rotationGroup 绕 Y 轴自转
   renderer.setAnimationLoop(() => {
+    // 如果需要更新模型动画，可在此处访问 model
     if (model) {
-      // 1. 拿到 anchor.group 的世界矩阵
-      const worldMat = anchor.group.matrixWorld;
-      const targetPos = new THREE.Vector3();
-      const targetQuat = new THREE.Quaternion();
-      worldMat.decompose(targetPos, targetQuat, new THREE.Vector3());
-
-      // 2. 平滑应用到 orientationGroup
-      smoothPos.lerp(targetPos, 0.5);
-      smoothQuat.slerp(targetQuat, 0.5);
-      orientationGroup.position.copy(smoothPos);
-      orientationGroup.quaternion.copy(smoothQuat);
-
-      // 3. rotationGroup 只做本地自转（位置始终为 0,0,0，四元数由 orientationGroup 决定）
-      rotationGroup.rotation.y += 0.01;
+      // 示例：模型旋转（或执行平滑插值动画）
+      model.rotation.y += 0.01;
     }
 
     renderer.render(scene, camera);
   });
 });
-
 
