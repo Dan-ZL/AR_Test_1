@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 如果需要更新模型动画，可在此处访问 model
     if (model) {
       // 示例：模型旋转（或执行平滑插值动画）
-      model.rotation.y += 0.01;
+      model.rotation.z += 0.01;
     }
 
     renderer.render(scene, camera);
