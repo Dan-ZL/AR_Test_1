@@ -21,18 +21,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
   directionalLight.position.set(1, 3, 2);
   scene.add(directionalLight);
-  
+
   const anchor = mindarThree.addAnchor(0);
 
   const loader = new GLTFLoader();
   loader.load(
     './assets/model.glb',
     (gltf) => {
-      model = gltf.scene; // ✅ 将模型赋值给全局变量
-
+      model = gltf.scene;
       model.position.set(0, 0.2, 0);
       model.scale.set(0.5, 0.5, 0.5);
-
       anchor.group.add(model);
       console.log("✅ 模型已添加至 anchor.group");
     },
@@ -42,15 +40,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   );
 
+  // ✅ 点击任意区域触发全屏（仅触发一次）
+  document.body.addEventListener('click', async () => {
+    if (!document.fullscreenElement && document.body.requestFullscreen) {
+      await document.body.requestFullscreen();
+      console.log("✅ 已请求全屏模式");
+    }
+  }, { once: true }); // 只触发一次，避免重复进入
+
+  // 启动 AR
   await mindarThree.start();
 
   renderer.setAnimationLoop(() => {
-    // 如果需要更新模型动画，可在此处访问 model
     if (model) {
-      // 示例：模型旋转（或执行平滑插值动画）
       model.rotation.y += 0.01;
     }
-
     renderer.render(scene, camera);
   });
 });
