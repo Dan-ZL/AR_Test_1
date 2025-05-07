@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 渲染循环：仅让 rotationGroup 绕 Y 轴自转
   renderer.setAnimationLoop(() => {
     if (model) {
-      rotationGroup.rotation.y += 0.01;
+      rotationGroup.rotation.z += 0.01;
     }
     renderer.render(scene, camera);
   });
