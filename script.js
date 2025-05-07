@@ -18,6 +18,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
   scene.add(light);
 
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(1, 3, 2);
+  scene.add(directionalLight);
+  
   const anchor = mindarThree.addAnchor(0);
 
   const loader = new GLTFLoader();
